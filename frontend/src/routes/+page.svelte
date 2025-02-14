@@ -22,8 +22,17 @@
         },
         body: JSON.stringify({ message: driveThruMessage })
       });
-      const data = await response.json();
-      console.log(data);
+
+      const responseData = await fetch('http://localhost:8000/orders', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await responseData.json();
+      orderHistory = data.orderHistory;
+
+      driveThruMessage = '';
     }
   </script>
   
