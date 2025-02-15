@@ -9,31 +9,41 @@
     };
   
     let driveThruMessage = $state('');
+    let errorMessage = $state('');
     let orderHistory: Order[] = $state([]);
     let totalBurgers = $derived(orderHistory.reduce((acc, order) => acc + order.burgers, 0));
     let totalFries = $derived(orderHistory.reduce((acc, order) => acc + order.fries, 0));
     let totalDrinks = $derived(orderHistory.reduce((acc, order) => acc + order.drinks, 0));
   
     async function handleSubmit() {
-      const response = await fetch('http://localhost:8000/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: driveThruMessage })
-      });
+        errorMessage = '';
+        const response = await fetch('http://localhost:8000/orders', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: driveThruMessage })
+        });
 
-      const responseData = await fetch('http://localhost:8000/orders', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            errorMessage = data.error;
+            return;
         }
-      });
-      const data = await responseData.json();
-      orderHistory = data.orderHistory;
 
-      driveThruMessage = '';
+        const responseData = await fetch('http://localhost:8000/orders', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        });
+
+        const updatedData = await responseData.json();
+        orderHistory = updatedData.orderHistory;
+
+        driveThruMessage = '';
     }
+        
   </script>
   
   <div class="container mx-auto p-6 max-w-4xl">
@@ -66,6 +76,9 @@
           Run
         </Button>
       </div>
+      {#if errorMessage}
+        <div class="text-red-500">{errorMessage}</div>
+      {/if}
     </div>
   
     <div>
@@ -75,9 +88,15 @@
           <div class="border rounded-lg p-4 flex justify-between items-center">
             <div>Order #{order.id}</div>
             <div>
-              {order.burgers} {order.burgers === 1 ? 'Burger' : 'Burgers'},
-              {order.fries} {order.fries === 1 ? 'Fry' : 'Fries'},
-              {order.drinks} {order.drinks === 1 ? 'Drink' : 'Drinks'}
+              {#if order.burgers > 0}
+                {order.burgers} {order.burgers === 1 ? 'Burger' : 'Burgers'}
+              {/if}
+              {#if order.fries > 0}
+                {order.fries} {order.fries === 1 ? 'Fry' : 'Fries'}
+              {/if}
+              {#if order.drinks > 0}
+                {order.drinks} {order.drinks === 1 ? 'Drink' : 'Drinks'}
+              {/if}
             </div>
           </div>
         {/each}
