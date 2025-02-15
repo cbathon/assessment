@@ -46,15 +46,18 @@ async def process_input(request: UserInput):
                     "properties": {
                         "burgers": {
                             "type": "integer",
-                            "description": "Number of burgers in the order."
+                            "description": "Number of burgers in the order.",
+                            "minimum": 0
                         },
                         "fries": {
                             "type": "integer",
-                            "description": "Number of fries in the order."
+                            "description": "Number of fries in the order.",
+                            "minimum": 0
                         },
                         "drinks": {
                             "type": "integer",
-                            "description": "Number of drinks in the order."
+                            "description": "Number of drinks in the order.",
+                            "minimum": 0
                         }
                     }
                 }
@@ -86,14 +89,14 @@ async def process_input(request: UserInput):
             burgers = function_args.get("burgers", 0)
             fries = function_args.get("fries", 0)
             drinks = function_args.get("drinks", 0)
-            if burgers < 0 or fries < 0 or drinks < 0:
-                return {"error": "Invalid order"}
             newOrder = Order(id=nextOrderId, burgers=burgers, fries=fries, drinks=drinks)
             orderHistory.append(newOrder)
             nextOrderId += 1
             return {"Successfully added order": newOrder}
         elif function_name == "remove_order":
             order_id = function_args.get("id")
+            if not any(order.id == order_id for order in orderHistory):
+                return {"error": "Order not found"}
             orderHistory = [order for order in orderHistory if order.id != order_id]
             return {"Successfully removed order": order_id}
         else:
