@@ -40,7 +40,7 @@ async def process_input(request: UserInput):
         functions=[
             {
                 "name": "create_order",
-                "description": "Create new order with quantity of burgers, fries, and drinks.",
+                "description": "Create new order with quantity of burgers, fries, and drinks. Negative numbers are not allowed.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -102,7 +102,7 @@ async def process_input(request: UserInput):
         else:
             return {"error": "Invalid function call"}
     else:
-        return {"error": "Invalid input. Please provide a clear order or cancellation request."}
+        return {"error": "Invalid input. Please provide a valid order or cancellation request."}
             
 @app.get("/orders")
 async def get_orders():
